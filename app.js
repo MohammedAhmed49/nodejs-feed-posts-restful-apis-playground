@@ -10,7 +10,7 @@ const app = express();
 // app.use(bodyParser.urlencoded()) // This is for data submitted by <form> (x-www-form-urlencoded)
 
 app.use(bodyParser.json()); // This is for json format sent in the request (application/json)
-app.use("images", express.static(path.join(__dirname, "images")));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
