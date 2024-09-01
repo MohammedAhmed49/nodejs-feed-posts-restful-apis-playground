@@ -16,6 +16,12 @@ exports.createPost = (req, res, next) => {
   const title = req.body.title;
   const content = req.body.content;
 
+  if (!req.file) {
+    const error = new Error("No image was uploaded!");
+    error.statusCode = 422;
+    throw error;
+  }
+
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -29,7 +35,7 @@ exports.createPost = (req, res, next) => {
   const post = new Post({
     title,
     content,
-    imageUrl: "images/goku.jpg",
+    imageUrl: "images/" + req.file.filename,
     creator: {
       name: "Mohammed",
     },
