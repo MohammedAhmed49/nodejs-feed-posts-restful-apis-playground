@@ -4,9 +4,18 @@ const { errorHandler } = require("../utils/error");
 const { clearFile } = require("../utils/files");
 
 exports.getPosts = (req, res, next) => {
-  Post.find()
+  const currentPage = req.query.page;
+  const perPage = 2;
+  let totalItems;
+  Post.countDocuments()
+    .then((count) => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage - 1) * 2)
+        .limit(perPage);
+    })
     .then((posts) => {
-      res.status(200).json({ posts });
+      res.status(200).json({ posts, totalItems: totalItems });
     })
     .catch((err) => {
       errorHandler(next, err);
