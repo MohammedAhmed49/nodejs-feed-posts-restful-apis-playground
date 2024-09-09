@@ -170,3 +170,33 @@ exports.deletePost = (req, res, next) => {
     })
     .catch((err) => errorHandler(next, err));
 };
+
+exports.getStatus = (req, res, next) => {
+  User.findById(req.userId).then((user) => {
+    res.status(200).json({ status: user.status });
+  });
+};
+
+exports.updateStatus = (req, res, next) => {
+  const newStatus = req.body.status;
+  console.log(req.body);
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    const error = new Error("Status is empty!");
+    error.statusCode = 422;
+    throw error;
+  }
+
+  User.findById(req.userId)
+    .then((user) => {
+      user.status = newStatus;
+      return user.save();
+    })
+    .then((result) => {
+      res
+        .status(201)
+        .json({ message: "Status updated successfully", status: newStatus });
+    })
+    .catch((err) => errorHandler(next, err));
+};

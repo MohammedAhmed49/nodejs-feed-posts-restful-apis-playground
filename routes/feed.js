@@ -5,6 +5,8 @@ const {
   getPost,
   updatePost,
   deletePost,
+  getStatus,
+  updateStatus,
 } = require("../controllers/feed");
 const { body } = require("express-validator");
 const { isAuth } = require("../middlewares/isAuth");
@@ -38,5 +40,14 @@ router.put(
 );
 
 router.delete("/post/:postId", isAuth, deletePost);
+
+router.get("/mystatus", isAuth, getStatus);
+
+router.post(
+  "/mystatus",
+  [body("status").trim().isLength({ min: 1 })],
+  isAuth,
+  updateStatus
+);
 
 module.exports = router;
