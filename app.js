@@ -6,8 +6,19 @@ const authRoutes = require("./routes/auth");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
+const { Server } = require("socket.io");
+const http = require("http");
 
 const app = express();
+
+const server = http.createServer(app);
+
+// Initialize Socket.IO on the HTTP server
+const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow all origins for development; restrict in production
+  },
+});
 
 const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -67,6 +78,9 @@ mongoose
     "mongodb+srv://mohammed:123@cluster0.qkxwsji.mongodb.net/social?retryWrites=true&w=majority&appName=Cluster0"
   )
   .then(() => {
-    app.listen(8080);
+    io.on("connection", (socket) => {
+      console.log("Client connected");
+    });
+    server.listen(8080);
   })
   .catch((err) => console.log(err));
