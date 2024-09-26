@@ -3,6 +3,7 @@ const Post = require("../models/post");
 const { errorHandler } = require("../utils/error");
 const { clearFile } = require("../utils/files");
 const User = require("../models/user");
+const io = require("../socket");
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page;
@@ -58,6 +59,13 @@ exports.createPost = (req, res, next) => {
         .then((user) => {
           relatedUser = user;
           user.posts.push(post);
+          io.getIO().emit("posts", {
+            action: "create",
+            post: {
+              ...post._doc,
+              creator: { _id: req.userId, name: user.name },
+            },
+          });
           return user.save();
         })
         .then((results) => {
@@ -116,13 +124,14 @@ exports.updatePost = (req, res, next) => {
   }
 
   Post.findById(postId)
+    .populate("creator")
     .then((post) => {
       if (!post) {
         const error = new Error("No post was found");
         error.statusCode = 404;
         throw error;
       }
-      if (post.creator.toString() !== req.userId) {
+      if (post.creator._id.toString() !== req.userId) {
         const error = new Error("Not authorized");
         error.statusCode = 403;
         throw error;
@@ -136,6 +145,10 @@ exports.updatePost = (req, res, next) => {
       return post.save();
     })
     .then((post) => {
+      io.getIO().emit("posts", {
+        action: "update",
+        post: post,
+      });
       res.status(200).json({ post });
     })
     .catch((err) => errorHandler(next, err));
@@ -179,7 +192,6 @@ exports.getStatus = (req, res, next) => {
 
 exports.updateStatus = (req, res, next) => {
   const newStatus = req.body.status;
-  console.log(req.body);
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {

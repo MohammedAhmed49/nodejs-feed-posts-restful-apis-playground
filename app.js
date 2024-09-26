@@ -6,7 +6,6 @@ const authRoutes = require("./routes/auth");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const multer = require("multer");
-const { Server } = require("socket.io");
 const http = require("http");
 
 const app = express();
@@ -14,11 +13,7 @@ const app = express();
 const server = http.createServer(app);
 
 // Initialize Socket.IO on the HTTP server
-const io = new Server(server, {
-  cors: {
-    origin: "*", // Allow all origins for development; restrict in production
-  },
-});
+const io = require("./socket").init(server);
 
 const diskStorage = multer.diskStorage({
   destination: (req, file, cb) => {
