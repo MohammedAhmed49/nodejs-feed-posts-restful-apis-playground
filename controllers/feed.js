@@ -7,7 +7,7 @@ const io = require("../socket");
 
 exports.getPosts = (req, res, next) => {
   const currentPage = req.query.page;
-  const perPage = 2;
+  const perPage = 3;
   let totalItems;
   Post.countDocuments()
     .then((count) => {
@@ -15,6 +15,7 @@ exports.getPosts = (req, res, next) => {
       return Post.find()
         .skip((currentPage - 1) * 2)
         .limit(perPage)
+        .sort({ createdAt: -1 })
         .populate("creator");
     })
     .then((posts) => {
